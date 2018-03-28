@@ -11,11 +11,6 @@ package svmrank
 #cgo CFLAGS:-I.
 #cgo LDFLAGS:-L. -lm
 
-// used for prediction.
-char docfile[200];
-char modelfile[200];
-char predictionsfile[200];
-
 // set_verbosity sets the verbosity for svm_rank.
 void set_verbosity(int v) {
 	verbosity = v;
@@ -66,40 +61,8 @@ void learn(DOC **docs, double *rankvalue, long totdoc, long totwords, char* mode
 	free(docs);
 }
 
-// --- here on out is just a straight copy of svm_classify.c --- //
-
-void read_input_parameters(int argc, char **argv, char *docfile, char *modelfile, char *predictionsfile, long int *verbosity, long int *pred_format) {
-  	long i;
-	strcpy (modelfile, "svm_model");
-	strcpy (predictionsfile, "svm_predictions");
-	(*verbosity)=2;
-	(*pred_format)=1;
-
-	for(i=1;(i<argc) && ((argv[i])[0] == '-');i++) {
-		switch ((argv[i])[1]) {
-			case 'h':  exit(0);
-			case 'v': i++; (*verbosity)=atol(argv[i]); break;
-			case 'f': i++; (*pred_format)=atol(argv[i]); break;
-			default: printf("\nUnrecognized option %s!\n\n",argv[i]);
-			exit(0);
-		}
-	}
-	if((i+1)>=argc) {
-		printf("\nNot enough input parameters!\n\n");
-		exit(0);
-	}
-	strcpy (docfile, argv[i]);
-	strcpy (modelfile, argv[i+1]);
-	if((i+2)<argc) {
-		strcpy (predictionsfile, argv[i+2]);
-	}
-	if(((*pred_format) != 0) && ((*pred_format) != 1)) {
-		printf("\nOutput format can only take the values 0 or 1!\n\n");
-		exit(0);
-	}
-}
-
-int make_prediction(int argc, char* argv[]) {
+// make_prediction predicts a ranking and outputs it to predictionsfile.
+int make_prediction(char *docfile, char *modelfile, char *predictionsfile) {
 	DOC *doc;
 	WORD *words;
 	long max_docs,max_words_doc,lld;
@@ -113,7 +76,7 @@ int make_prediction(int argc, char* argv[]) {
 	FILE *predfl,*docfl;
 	MODEL *model;
 
-	read_input_parameters(argc,argv,docfile,modelfile,predictionsfile, &verbosity,&pred_format);
+	pred_format = 1;
 
 	nol_ll(docfile,&max_docs,&max_words_doc,&lld);
 	max_words_doc+=2;
@@ -206,7 +169,6 @@ int make_prediction(int argc, char* argv[]) {
 }
 */
 import "C"
-import "unsafe"
 
 // Verbosity sets the verbosity level for svm_rank.
 func Verbosity(v int) {
@@ -233,17 +195,5 @@ func learn(docs **C.DOC, totDoc, totWords C.long, filename string) {
 
 // predict takes an example file and a model file and produces some prediction in the output file.
 func predict(exampleFile, modelFile, outputFile string) {
-	// Create a C array.
-	argv := C.malloc(C.size_t(4) * C.size_t(unsafe.Sizeof(uintptr(0))))
-
-	// Convert the C array to a Go Array so we can index it.
-	a := (*[1<<30 - 1]*C.char)(argv)
-
-	// Populate arguments to function.
-	a[0] = C.CString("")
-	a[1] = C.CString(exampleFile)
-	a[2] = C.CString(modelFile)
-	a[3] = C.CString(outputFile)
-
-	C.make_prediction(C.int(4), (**C.char)(argv))
+	C.make_prediction(C.CString(exampleFile), C.CString(modelFile), C.CString(outputFile))
 }
