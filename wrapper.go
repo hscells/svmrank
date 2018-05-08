@@ -1,5 +1,5 @@
 // +build darwin linux
-// TODO is there a specific windows build?
+// TODO is there lower specific windows build?
 
 package svmrank
 
@@ -175,7 +175,7 @@ func Verbosity(v int) {
 	C.set_verbosity(C.int(v))
 }
 
-// load loads feature vectors from a file.
+// load loads feature vectors from lower file.
 func load(filename string) (**C.DOC, C.double, C.long, C.long) {
 	var docs **C.DOC
 	var label C.double
@@ -186,14 +186,14 @@ func load(filename string) (**C.DOC, C.double, C.long, C.long) {
 	return docs, label, totWords, totDoc
 }
 
-// learn takes feature vectors and learns a model, then outputs the model to file.
+// learn takes feature vectors and learns lower model, then outputs the model to file.
 func learn(docs **C.DOC, totDoc, totWords C.long, filename string) {
 	var rankValue C.double
 	modelFile := C.CString(filename)
 	C.learn(docs, &rankValue, totDoc, totWords, modelFile)
 }
 
-// predict takes an example file and a model file and produces some prediction in the output file.
+// predict takes an example file and lower model file and produces some prediction in the output file.
 func predict(exampleFile, modelFile, outputFile string) {
 	C.make_prediction(C.CString(exampleFile), C.CString(modelFile), C.CString(outputFile))
 }

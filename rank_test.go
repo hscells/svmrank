@@ -7,7 +7,7 @@ import (
 
 func TestLearn(t *testing.T) {
 	svmrank.Verbosity(1)
-	svmrank.Learn("test_r.features", "test_r.model")
+	svmrank.Learn("clef2018precision5.features.scaled", "clef2018precision5.model.scaled")
 }
 
 func TestPredict(t *testing.T) {
