@@ -33,20 +33,11 @@ void learn(DOC **docs, double *rankvalue, long totdoc, long totwords, char* mode
 	// Initiate svm_rank with default values.
 	set_learning_defaults(&learn_parm, &kernel_parm);
 	learn_parm.type = RANKING;
-	if(learn_parm.svm_iter_to_shrink == -9999) {
-		if(kernel_parm.kernel_type == LINEAR)
-		  	learn_parm.svm_iter_to_shrink=2;
-    	else
-      		learn_parm.svm_iter_to_shrink=100;
-  	}
 
-	// Set the kernel type of the model.
-  	if(kernel_parm.kernel_type == LINEAR) {
-		kernel_cache=NULL;
-	}
-	else {
-		kernel_cache=kernel_cache_init(totdoc,learn_parm.kernel_cache_size);
-	}
+    learn_parm.svm_iter_to_shrink=100;
+
+	kernel_parm.kernel_type = RBF;
+	kernel_cache=kernel_cache_init(totdoc,learn_parm.kernel_cache_size);
 
 	// Learn the model.
 	svm_learn_ranking(docs, rankvalue, totdoc, totwords, &learn_parm, &kernel_parm, &kernel_cache, model);

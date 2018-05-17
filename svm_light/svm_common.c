@@ -1877,7 +1877,7 @@ void read_documents(char *docfile, DOC ***docs, double **label,
     }
     (*docs)[dnum] = create_example(dnum,queryid,slackid,costfactor,
 				   create_svector(words,comment,1.0));
-    /* printf("\nNorm=%f\n",((*docs)[dnum]->fvec)->twonorm_sq);  */
+    printf("\nNorm=%f\n",((*docs)[dnum]->fvec)->twonorm_sq);
     dnum++;  
     if(verbosity>=1) {
       if((dnum % 100) == 0) {

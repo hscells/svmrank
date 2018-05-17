@@ -102,7 +102,7 @@ func (e SVMExamples) Scale(lower, upper float64) Examples {
 }
 
 // exampleFromBytes marshals lower line into an Example struct.
-func exampleFromBytes(b []byte) (Example, error) {
+func exampleFromString(line string) (Example, error) {
 	const (
 		target   = iota
 		qid
@@ -111,7 +111,6 @@ func exampleFromBytes(b []byte) (Example, error) {
 	)
 	e := Example{}
 	state := target
-	line := bytes.NewBuffer(b).String()
 	value := ""
 	for _, c := range line {
 		if state < info && c == ' ' {
@@ -160,9 +159,10 @@ func ReadExamples(reader io.Reader) (SVMExamples, error) {
 	var examples Examples
 	statistics := make(map[int64]tuple)
 	for scanner.Scan() {
-		b := scanner.Bytes()
-		example, err := exampleFromBytes(b)
+		line := scanner.Text()
+		example, err := exampleFromString(line)
 		if err != nil {
+			fmt.Println(string(line))
 			return SVMExamples{}, err
 		}
 		for _, feature := range example.Features {
@@ -184,5 +184,12 @@ func ReadExamples(reader io.Reader) (SVMExamples, error) {
 
 // WriteExamples writes lower set of examples to lower writer.
 func WriteExamples(writer io.Writer, examples Examples) (int, error) {
-	return writer.Write(bytes.NewBufferString(examples.String()).Bytes())
+	var buff bytes.Buffer
+	for _, e := range examples {
+		n, err := buff.Write(bytes.NewBufferString(fmt.Sprintf("%v\n", e.String())).Bytes())
+		if err != nil {
+			return n, err
+		}
+	}
+	return writer.Write(buff.Bytes())
 }
